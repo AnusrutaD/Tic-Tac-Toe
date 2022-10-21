@@ -108,6 +108,75 @@ classDiagram
 - Common Behaviour - `play()`
 - common Attribute - `symbol`
 
+```mermaid
+classDiagram
+    class Game{
+        -Board board
+        -Player[] players
+        +Register(HumanPlayer) HumanPlayer
+        +startGame(HumanPlayer, BotPlayer, int row, int column) Board
+        +makeMove(int playerId, int x, int y) Board
+        +checkWinner(Board, HumanPlayer, BotPlayer) int
+        +undo(Board) Board
+    }
+    class Board{
+        -int row
+        -int column
+        -Cell[][] cells
+        +createBoard(row, column) Board
+    }
+    class Cell{
+        -int x
+        -int y
+        -Symbol symbol
+    }
+    class Symbol{
+        -char O/X 
+
+    }
+    class User{
+        -String name
+        -String email
+        -byte[] photo
+        +register() User
+    }
+    class Player{
+        <<abstract>>
+        -Symbol symbol
+        +play(Board)* cell
+    }
+    class HumanPlayer{
+        -User user
+        -byte[] photo
+        
+        +play(Board) cell
+    }
+    class BotPlayer{
+        -int id
+        -Level level
+        +play() cell
+    }
+    class Level{
+        <<enumeration>>
+        -EASY
+        -MEDIUM
+        -HARD
+    }
+    Game "1" --* "1" Board
+    Board "1" --* "m" Cell
+    Game "1" --* "M" Player
+    
+
+    Cell "1" --* "1" Symbol
+
+    Player <|-- HumanPlayer
+    Player <|-- BotPlayer
+    Player "1" --* "1" Symbol
+
+    HumanPlayer "1" --o  "1" User
+    BotPlayer "1" --* "1" Level
+```
+
 ## Tight coupling
 - HumanPlayer
 - BotPlayer
@@ -116,3 +185,94 @@ classDiagram
 ## OCP and SRP violation in play method
 
 ## Huge memory consumption
+
+## Optimized Design 
+```mermaid
+classDiagram
+class Game{
+        -Board board
+        -Player[] players
+        +Register(HumanPlayer) HumanPlayer
+        +startGame(HumanPlayer, BotPlayer, int row, int column) Board
+        +makeMove(int playerId, int x, int y) Board
+        +checkWinner(Board, HumanPlayer, BotPlayer) int
+        +undo(Board) Board
+    }
+    class Board{
+        -int row
+        -int column
+        -Cell[][] cells
+        +createBoard(row, column) Board
+    }
+    class Cell{
+        -int x
+        -int y
+        -Symbol symbol
+    }
+    class Symbol{
+        -char O/X 
+
+    }
+    class User{
+        -String name
+        -String email
+        -byte[] photo
+        +register() User
+    }
+    class Player{
+        <<abstract>>
+        -Symbol symbol
+        +play(Board)* cell
+    }
+    class HumanPlayer{
+        -User user
+        -byte[] photo
+        
+        +play(Board) cell
+    }
+    class BotPlayer{
+        -int id
+        -Level level
+        -Symbol symbol
+        -PlayingStrategy strategy
+        +play(Board) cell
+    }
+    class PlayingStrategy{
+        <<interface>>
+        +play(Board) cell
+    }
+    class RandomPlayingStrategy{
+        +play(Board) Cell
+    }
+    class MinMaxPlayingStrategy{
+        +play(Board) Cell
+    }
+    class AlphaBetaPlayingStrategy{
+        +play(Board) Cell
+    }
+    class Level{
+        <<enumeration>>
+        -EASY
+        -MEDIUM
+        -HARD
+    }
+
+    Game "1" --* "1" Board
+    Board "1" --* "m" Cell
+    Game "1" --* "M" Player
+
+    Cell "1" --* "1" Symbol
+
+    Player <|-- HumanPlayer
+    Player <|-- BotPlayer
+    Player "1" --* "1" Symbol
+
+    PlayingStrategy <|-- RandomPlayingStrategy
+    PlayingStrategy <|-- MinMaxPlayingStrategy
+    PlayingStrategy <|-- AlphaBetaPlayingStrategy
+
+    HumanPlayer "1" --o  "1" User
+
+    BotPlayer "M" --o "1" PlayingStrategy
+    BotPlayer "1" --* "1" Level
+```
